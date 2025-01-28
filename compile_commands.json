@@ -1,0 +1,20 @@
+[
+ {
+  "directory": "/nfs/homes/mrouves/Documents/github/philosophers",
+  "arguments": [
+   "clang",
+   "-Wall",
+   "-Wextra",
+   "-Werror",
+   "-g",
+   "-I",
+   "headers",
+   "-c",
+   "sources/main.c",
+   "-o",
+   ".objs/main.o",
+   ".objs/main.o.log"
+  ],
+  "file": "sources/main.c"
+ }
+]

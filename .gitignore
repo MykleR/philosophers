@@ -1,5 +1,7 @@
 # Prerequisites
 *.d
+.cache/
+philo
 
 # Object files
 *.o
