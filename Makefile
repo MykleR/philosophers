@@ -6,7 +6,7 @@
 #    By: mrouves <marvin@42.fr>                     +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/10/08 18:27:35 by mrouves           #+#    #+#              #
-#    Updated: 2025/01/28 20:02:59 by mrouves          ###   ########.fr        #
+#    Updated: 2025/01/30 18:51:32 by mrouves          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -29,7 +29,7 @@ DIR_DUP			= mkdir -p $(@D)
 all: $(NAME) $(OBJS)
 
 $(NAME): $(OBJS)
-	@$(call run_and_test, $(CC) $(CFLAGS) $(IFLAGS) $^ -o $@)
+	@$(call run_and_test, $(CC) $(CFLAGS) $(IFLAGS) $^ -o $@ -pthread)
 	@printf "$(BOLD)$@$(NO_COLOR) compiled $(OK_COLOR)successfully$(NO_COLOR)\n"
 
 $(DIR_OBJS)/%.o: $(DIR_SOURCES)/%.c
