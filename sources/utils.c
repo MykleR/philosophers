@@ -6,11 +6,40 @@
 /*   By: mrouves <mrouves@42angouleme.fr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/28 20:02:02 by mrouves           #+#    #+#             */
-/*   Updated: 2025/01/28 20:16:17 by mrouves          ###   ########.fr       */
+/*   Updated: 2025/02/16 19:13:35 by mrouves          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 # include <philo.h>
+
+uint64_t	timestamp(t_timeval start)
+{
+	t_timeval	now;
+    uint64_t	ms;
+	
+	gettimeofday(&now, NULL);
+	ms = (now.tv_sec - start.tv_sec) * 1000
+		+ (now.tv_usec - start.tv_usec) / 1000;
+	return (ms);
+}
+
+void	state_print(t_philo *philo, uint8_t flags)
+{
+	uint64_t	time;
+	t_state		state;
+
+	if (flags & FQUIET)
+		return ;
+	if (flags & FSLOCK)
+		pthread_mutex_lock(&philo->mut_lock);
+	state = philo->state;
+	time = timestamp(philo->time_start) * !(flags & FWAIT);
+	if (flags & FSLOCK)
+		pthread_mutex_unlock(&philo->mut_lock);
+	pthread_mutex_lock(philo->mut_print);
+	printf("[%010lu] %d %s", time, philo->id, (char *)STATE_MSGS + state);
+	pthread_mutex_unlock(philo->mut_print);
+}
 
 bool	safe_atou(const char *s, uint32_t *out)
 {
