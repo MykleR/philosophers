@@ -6,7 +6,7 @@
 /*   By: mrouves <mrouves@42angouleme.fr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/16 05:16:28 by mrouves           #+#    #+#             */
-/*   Updated: 2025/02/16 19:07:16 by mrouves          ###   ########.fr       */
+/*   Updated: 2025/02/16 23:41:59 by mrouves          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,13 +37,13 @@ static void philo_eat(t_philo *philo)
 {
 	if (philo_state_get(philo) != EAT)
 		return ;
-	usleep(philo->delays.eat * 1000);
+	ft_sleep(philo, philo->delays.eat);
 	pthread_mutex_lock(&philo->mut_lock);
+	philo->nb_meals++;
 	gettimeofday(&philo->time_lmeal, NULL);
 	pthread_mutex_unlock(&philo->mut_lock);
 	philo_state_set(philo, SLEEP, 0);
 }
-
 
 static void	philo_think(t_philo *philo)
 {
@@ -56,16 +56,8 @@ static void	philo_think(t_philo *philo)
 	philo_state_set(philo, RFORK, 0);
 	philo_state_set(philo, EAT, 0);
 	philo_eat(philo);
-	pthread_mutex_unlock(philo->mut_lfork);
 	pthread_mutex_unlock(philo->mut_rfork);
-}
-
-static void philo_sleep(t_philo *philo)
-{
-	if (philo_state_get(philo) != SLEEP)
-		return ;
-	usleep(philo->delays.sleep * 1000);
-	philo_state_set(philo, THINK, 0);
+	pthread_mutex_unlock(philo->mut_lfork);
 }
 
 void	*__philo_thread(t_philo *philo)
@@ -77,8 +69,10 @@ void	*__philo_thread(t_philo *philo)
 	{
 		philo_think(philo);
 		philo_eat(philo);
-		philo_sleep(philo);
-		usleep(100);
+		if (philo_state_get(philo) == SLEEP)
+			ft_sleep(philo, philo->delays.sleep);
+		philo_state_set(philo, THINK, 0);
+		usleep(WAIT_UPDATE);
 	}
 	return (NULL);
 }

@@ -6,7 +6,7 @@
 /*   By: mrouves <mrouves@42angouleme.fr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/28 20:02:02 by mrouves           #+#    #+#             */
-/*   Updated: 2025/02/16 19:13:35 by mrouves          ###   ########.fr       */
+/*   Updated: 2025/02/16 23:44:33 by mrouves          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,6 +39,15 @@ void	state_print(t_philo *philo, uint8_t flags)
 	pthread_mutex_lock(philo->mut_print);
 	printf("[%010lu] %d %s", time, philo->id, (char *)STATE_MSGS + state);
 	pthread_mutex_unlock(philo->mut_print);
+}
+
+void ft_sleep(t_philo *philo, uint64_t ms)
+{
+	t_timeval	start;
+	
+	gettimeofday(&start, NULL);
+	while (philo_state_get(philo) != DEAD && timestamp(start) < ms)
+		usleep(1000);
 }
 
 bool	safe_atou(const char *s, uint32_t *out)
