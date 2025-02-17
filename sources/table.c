@@ -6,7 +6,7 @@
 /*   By: mrouves <mrouves@42angouleme.fr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/16 05:16:40 by mrouves           #+#    #+#             */
-/*   Updated: 2025/02/17 22:35:24 by mrouves          ###   ########.fr       */
+/*   Updated: 2025/02/17 23:09:51 by mrouves          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -100,8 +100,8 @@ void	table_simulate(t_table *table)
 	pthread_mutex_unlock(&table->mut_start);
 	while (!table->stop)
 	{
-		usleep(WAIT_UPDATE);
 		simulation_check(table);
+		usleep(WAIT_UPDATE);
 	}
 	table_destroy(table);
 }

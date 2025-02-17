@@ -6,7 +6,7 @@
 /*   By: mrouves <mrouves@42angouleme.fr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/28 20:02:02 by mrouves           #+#    #+#             */
-/*   Updated: 2025/02/17 22:14:00 by mrouves          ###   ########.fr       */
+/*   Updated: 2025/02/17 23:03:27 by mrouves          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,17 +21,17 @@ uint64_t	time_stamp(t_timeval start)
 		+ (now.tv_usec - start.tv_usec));
 }
 
-void	state_print(pthread_mutex_t *lock, t_state state, uint32_t id, t_timeval *time)
+void	state_print(t_philo *philo, uint8_t flags)
 {
+	char		*msg;
 	uint64_t	ms;
 
-	ms = 0;
-	if (time)
-		ms = time_stamp(*time) / 1000;
-	pthread_mutex_lock(lock);
-	if (*((char *)STATE_MSGS + state))
-		printf("%lu %d %s", ms, id, (char *)STATE_MSGS + state);
-	pthread_mutex_unlock(lock);
+	ms = time_stamp(philo->timer_start) / 1000 * !(flags & FSTART);
+	msg = (char *)STATE_MSGS + philo->state;
+	pthread_mutex_lock(philo->mut_print);
+	if (*msg)
+		printf("%lu %d %s", ms, philo->id, msg);
+	pthread_mutex_unlock(philo->mut_print);
 }
 
 bool	safe_atou(const char *s, uint32_t *out)

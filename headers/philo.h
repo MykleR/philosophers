@@ -6,7 +6,7 @@
 /*   By: mrouves <mrouves@42angouleme.fr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/28 19:44:28 by mrouves           #+#    #+#             */
-/*   Updated: 2025/02/17 22:10:29 by mrouves          ###   ########.fr       */
+/*   Updated: 2025/02/17 23:09:54 by mrouves          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,8 @@
 # define WAIT_INIT		10000
 
 # define FQUIET		0b001
+# define FSTART		0b010
+# define FFORCE		0b100
 
 # define STATE_MSGS "\
 is thinking\n\0\
@@ -87,7 +89,6 @@ typedef struct s_table
 }	t_table;
 
 t_state		philo_state_get(t_philo *philo);
-void		philo_wait(t_philo *philo, uint64_t ms);
 void		philo_state_set(t_philo *philo, t_state s, uint8_t flags);
 void		*__philo_thread(t_philo *philo);
 
@@ -95,7 +96,6 @@ void		table_simulate(t_table *table);
 
 uint64_t	time_stamp(t_timeval start);
 bool		safe_atou(const char *str, uint32_t *out);
-void		state_print(pthread_mutex_t *lock, t_state state,
-				uint32_t id, t_timeval *time);
+void		state_print(t_philo *philo, uint8_t flags);
 
 #endif
