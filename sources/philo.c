@@ -6,7 +6,7 @@
 /*   By: mrouves <mrouves@42angouleme.fr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/16 05:16:28 by mrouves           #+#    #+#             */
-/*   Updated: 2025/02/16 23:41:59 by mrouves          ###   ########.fr       */
+/*   Updated: 2025/02/17 18:09:27 by mrouves          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,7 @@ void	philo_state_set(t_philo *philo, t_state state, uint8_t flags)
 	pthread_mutex_unlock(&philo->mut_lock);
 }
 
-static void philo_eat(t_philo *philo)
+static void	philo_eat(t_philo *philo)
 {
 	if (philo_state_get(philo) != EAT)
 		return ;
