@@ -6,49 +6,32 @@
 /*   By: mrouves <mrouves@42angouleme.fr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/28 20:02:02 by mrouves           #+#    #+#             */
-/*   Updated: 2025/02/17 18:49:55 by mrouves          ###   ########.fr       */
+/*   Updated: 2025/02/17 22:14:00 by mrouves          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <philo.h>
 
-uint64_t	timestamp(t_timeval start)
+uint64_t	time_stamp(t_timeval start)
 {
 	t_timeval	now;
-	uint64_t	ms;
 
 	gettimeofday(&now, NULL);
-	ms = (now.tv_sec - start.tv_sec) * 1000
-		+ (now.tv_usec - start.tv_usec) / 1000;
-	return (ms);
+	return ((now.tv_sec - start.tv_sec) * 1000000
+		+ (now.tv_usec - start.tv_usec));
 }
 
-void	state_print(t_philo *philo, uint8_t flags)
+void	state_print(pthread_mutex_t *lock, t_state state, uint32_t id, t_timeval *time)
 {
-	uint64_t	time;
-	t_state		state;
+	uint64_t	ms;
 
-	if (flags & FQUIET)
-		return ;
-	if (flags & FSLOCK)
-		pthread_mutex_lock(&philo->mut_lock);
-	state = philo->state;
-	time = timestamp(philo->time_start) * !(flags & FWAIT);
-	if (flags & FSLOCK)
-		pthread_mutex_unlock(&philo->mut_lock);
-	pthread_mutex_lock(philo->mut_print);
+	ms = 0;
+	if (time)
+		ms = time_stamp(*time) / 1000;
+	pthread_mutex_lock(lock);
 	if (*((char *)STATE_MSGS + state))
-		printf("%lu %d %s", time, philo->id, (char *)STATE_MSGS + state);
-	pthread_mutex_unlock(philo->mut_print);
-}
-
-void	ft_sleep(t_philo *philo, uint64_t ms)
-{
-	t_timeval	start;
-
-	gettimeofday(&start, NULL);
-	while (philo_state_get(philo) != DEAD && timestamp(start) < ms)
-		usleep(1000);
+		printf("%lu %d %s", ms, id, (char *)STATE_MSGS + state);
+	pthread_mutex_unlock(lock);
 }
 
 bool	safe_atou(const char *s, uint32_t *out)

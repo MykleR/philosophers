@@ -6,7 +6,7 @@
 /*   By: mrouves <mrouves@42angouleme.fr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/28 19:44:28 by mrouves           #+#    #+#             */
-/*   Updated: 2025/02/17 18:48:55 by mrouves          ###   ########.fr       */
+/*   Updated: 2025/02/17 22:10:29 by mrouves          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,13 +21,12 @@
 # include <inttypes.h>
 # include <sys/time.h>
 
-# define MAX_PHILO	200
-# define WAIT_UPDATE 100
-# define WAIT_INIT	 1000
+# define MAX_PHILO		200
+# define WAIT_UPDATE	1
+# define WAIT_SLEEP		10
+# define WAIT_INIT		10000
 
-# define FWAIT	0b010
-# define FQUIET	0b001
-# define FSLOCK 0b100
+# define FQUIET		0b001
 
 # define STATE_MSGS "\
 is thinking\n\0\
@@ -65,8 +64,8 @@ typedef struct s_philo
 	pthread_mutex_t	*mut_print;
 	pthread_mutex_t	*mut_start;
 	pthread_mutex_t	mut_lock;
-	t_timeval		time_start;
-	t_timeval		time_lmeal;
+	t_timeval		timer_start;
+	t_timeval		timer_death;
 	t_delays		delays;
 	uint32_t		nb_meals;
 	uint32_t		id;
@@ -88,14 +87,15 @@ typedef struct s_table
 }	t_table;
 
 t_state		philo_state_get(t_philo *philo);
+void		philo_wait(t_philo *philo, uint64_t ms);
 void		philo_state_set(t_philo *philo, t_state s, uint8_t flags);
 void		*__philo_thread(t_philo *philo);
 
 void		table_simulate(t_table *table);
 
-uint64_t	timestamp(t_timeval start);
+uint64_t	time_stamp(t_timeval start);
 bool		safe_atou(const char *str, uint32_t *out);
-void		state_print(t_philo *philo, uint8_t flags);
-void		ft_sleep(t_philo *philo, uint64_t ms);
+void		state_print(pthread_mutex_t *lock, t_state state,
+				uint32_t id, t_timeval *time);
 
 #endif
