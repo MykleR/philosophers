@@ -6,31 +6,32 @@
 /*   By: mrouves <mrouves@42angouleme.fr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/28 20:02:02 by mrouves           #+#    #+#             */
-/*   Updated: 2025/02/17 23:03:27 by mrouves          ###   ########.fr       */
+/*   Updated: 2025/03/04 19:29:02 by mrouves          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <philo.h>
 
-uint64_t	time_stamp(t_timeval start)
+uint64_t	micro_time(void)
 {
-	t_timeval	now;
+	struct timeval	time;
 
-	gettimeofday(&now, NULL);
-	return ((now.tv_sec - start.tv_sec) * 1000000
-		+ (now.tv_usec - start.tv_usec));
+	gettimeofday(&time, NULL);
+	return (time.tv_sec * 1000000L + time.tv_usec);
 }
 
-void	state_print(t_philo *philo, uint8_t flags)
+void	state_print(t_philo *philo)
 {
+	static char	*msgs = MSG_THINK MSG_LFORK MSG_RFORK \
+		MSG_EAT MSG_SLEEP MSG_DEAD;
 	char		*msg;
 	uint64_t	ms;
 
-	ms = time_stamp(philo->timer_start) / 1000 * !(flags & FSTART);
-	msg = (char *)STATE_MSGS + philo->state;
+	msg = msgs + philo->state;
 	pthread_mutex_lock(philo->mut_print);
+	ms = (micro_time() - philo->time_start) / 1000;
 	if (*msg)
-		printf("%lu %d %s", ms, philo->id, msg);
+		printf("%lu %u %s\n", ms, philo->id + 1, msg);
 	pthread_mutex_unlock(philo->mut_print);
 }
 

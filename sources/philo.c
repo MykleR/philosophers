@@ -6,7 +6,7 @@
 /*   By: mrouves <mrouves@42angouleme.fr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/16 05:16:28 by mrouves           #+#    #+#             */
-/*   Updated: 2025/02/17 23:10:32 by mrouves          ###   ########.fr       */
+/*   Updated: 2025/03/04 19:26:46 by mrouves          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,10 +14,10 @@
 
 static void	philo_uwait(t_philo *philo, uint64_t microsecs)
 {
-	t_timeval	start;
+	uint64_t	start;
 
-	gettimeofday(&start, NULL);
-	while (philo_state_get(philo) != DEAD && time_stamp(start) < microsecs)
+	start = micro_time();
+	while (philo_state_get(philo) != DEAD && micro_time() - start < microsecs)
 		usleep(WAIT_SLEEP);
 }
 
@@ -31,14 +31,14 @@ t_state	philo_state_get(t_philo *philo)
 	return (state);
 }
 
-void	philo_state_set(t_philo *philo, t_state state, uint8_t flags)
+void	philo_state_set(t_philo *philo, t_state state, bool quiet)
 {
 	pthread_mutex_lock(&philo->mut_lock);
-	if (philo->state != DEAD && ((flags & FFORCE) || philo->state != state))
+	if (philo->state != DEAD && philo->state != state)
 	{
 		philo->state = state;
-		if (!(flags & FQUIET))
-			state_print(philo, flags);
+		if (!quiet)
+			state_print(philo);
 	}
 	pthread_mutex_unlock(&philo->mut_lock);
 }
@@ -46,32 +46,33 @@ void	philo_state_set(t_philo *philo, t_state state, uint8_t flags)
 static void	philo_simulate(t_philo *philo)
 {
 	pthread_mutex_lock(philo->mut_lfork);
-	philo_state_set(philo, LFORK, 0);
+	philo_state_set(philo, LFORK, false);
 	pthread_mutex_lock(philo->mut_rfork);
-	philo_state_set(philo, RFORK, 0);
-	philo_state_set(philo, EAT, 0);
+	philo_state_set(philo, RFORK, false);
+	philo_state_set(philo, EAT, false);
 	philo_uwait(philo, philo->delays.eat * 1000);
 	pthread_mutex_lock(&philo->mut_lock);
 	philo->nb_meals++;
-	gettimeofday(&philo->timer_death, NULL);
+	philo->time_lmeal = micro_time();
 	pthread_mutex_unlock(&philo->mut_lock);
-	philo_state_set(philo, SLEEP, 0);
+	philo_state_set(philo, SLEEP, false);
 	pthread_mutex_unlock(philo->mut_rfork);
 	pthread_mutex_unlock(philo->mut_lfork);
 	philo_uwait(philo, philo->delays.sleep * 1000);
-	philo_state_set(philo, THINK, 0);
+	philo_state_set(philo, THINK, false);
 }
 
 void	*__philo_thread(t_philo *philo)
 {
-	philo_state_set(philo, THINK, FFORCE | FSTART);
 	pthread_mutex_lock(philo->mut_start);
 	pthread_mutex_unlock(philo->mut_start);
 	while (philo_state_get(philo) != DEAD)
 	{
 		if (philo->mut_lfork != philo->mut_rfork)
 			philo_simulate(philo);
-		usleep(WAIT_UPDATE);
+		else
+			philo_state_set(philo, LFORK, false);
+		philo_uwait(philo, WAIT_PHILO);
 	}
 	return (NULL);
 }

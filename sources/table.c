@@ -6,7 +6,7 @@
 /*   By: mrouves <mrouves@42angouleme.fr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/16 05:16:40 by mrouves           #+#    #+#             */
-/*   Updated: 2025/02/17 23:09:51 by mrouves          ###   ########.fr       */
+/*   Updated: 2025/03/04 19:29:54 by mrouves          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@ static void	simulation_check(t_table *table)
 {
 	bool		target;
 	t_philo		*philo;
+	uint64_t	death;
 	uint32_t	i;
 
 	i = -1;
@@ -24,8 +25,8 @@ static void	simulation_check(t_table *table)
 	{
 		philo = table->philos + i;
 		pthread_mutex_lock(&philo->mut_lock);
-		table->stop = philo->state != EAT
-			&& time_stamp(philo->timer_death) >= table->delays.die * 1000;
+		death = micro_time() - philo->time_lmeal;
+		table->stop = philo->state != EAT && death >= table->delays.die * 1000;
 		target &= (philo->nb_meals >= table->nb_meals);
 		pthread_mutex_unlock(&philo->mut_lock);
 		if (table->stop)
@@ -45,32 +46,34 @@ static bool	philo_init(t_table *table, t_philo *philo, uint32_t id)
 	philo->mut_rfork = table->forks + ((id + !is_last) % table->nb_philo);
 	philo->mut_print = &table->mut_print;
 	philo->mut_start = &table->mut_start;
+	philo->time_start = micro_time();
+	philo->time_lmeal = philo->time_start;
 	return (pthread_create(&philo->id_thread, NULL,
 			(void *(*)(void *))__philo_thread, philo) == 0);
 }
 
 static bool	table_init(t_table *table)
 {
-	bool		success;
+	uint64_t	time;
 	uint32_t	i;
+	uint32_t	j;
 
 	i = -1;
 	pthread_mutex_lock(&table->mut_start);
 	while (++i < table->nb_philo)
 		if (!philo_init(table, table->philos + i, i))
 			break ;
-	success = (i == table->nb_philo);
 	usleep(WAIT_INIT);
-	gettimeofday(&table->start, NULL);
-	i = -1;
-	while (++i < table->nb_philo)
+	time = micro_time();
+	j = -1;
+	while (++j <= i)
 	{
-		pthread_mutex_lock(&table->philos[i].mut_lock);
-		table->philos[i].timer_start = table->start;
-		table->philos[i].timer_death = table->start;
-		pthread_mutex_unlock(&table->philos[i].mut_lock);
+		pthread_mutex_lock(&table->philos[j].mut_lock);
+		table->philos[j].time_start = time;
+		table->philos[j].time_lmeal = time;
+		pthread_mutex_unlock(&table->philos[j].mut_lock);
 	}
-	return (success);
+	return (i == table->nb_philo);
 }
 
 static void	table_destroy(t_table *table)
@@ -79,7 +82,7 @@ static void	table_destroy(t_table *table)
 
 	i = -1;
 	while (++i < table->nb_philo)
-		philo_state_set(table->philos + i, DEAD, FQUIET);
+		philo_state_set(table->philos + i, DEAD, true);
 	i = -1;
 	while (++i < table->nb_philo)
 		if (table->philos[i].id_thread)
@@ -101,7 +104,7 @@ void	table_simulate(t_table *table)
 	while (!table->stop)
 	{
 		simulation_check(table);
-		usleep(WAIT_UPDATE);
+		usleep(WAIT_SIMUL);
 	}
 	table_destroy(table);
 }
