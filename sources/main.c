@@ -6,7 +6,7 @@
 /*   By: mrouves <mrouves@42angouleme.fr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/28 19:44:13 by mrouves           #+#    #+#             */
-/*   Updated: 2025/03/04 19:31:52 by mrouves          ###   ########.fr       */
+/*   Updated: 2025/03/23 22:58:03 by mrouves          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,19 +20,17 @@ uint64_t	micro_time(void)
 	return (time.tv_sec * 1000000L + time.tv_usec);
 }
 
-void	state_print(t_philo *philo)
+void	state_print(t_state state, pthread_mutex_t *mut_print,
+				uint32_t id, uint64_t time_start)
 {
-	static char	*msgs = MSG_THINK MSG_LFORK MSG_RFORK \
+	const char	*msgs = MSG_THINK MSG_LFORK MSG_RFORK \
 		MSG_EAT MSG_SLEEP MSG_DEAD;
-	char		*msg;
 	uint64_t	ms;
 
-	msg = msgs + philo->state;
-	pthread_mutex_lock(philo->mut_print);
-	ms = (micro_time() - philo->time_start) / 1000;
-	if (*msg)
-		printf("%lu %u %s\n", ms, philo->id + 1, msg);
-	pthread_mutex_unlock(philo->mut_print);
+	pthread_mutex_lock(mut_print);
+	ms = (micro_time() - time_start) / 1000;
+	printf(msgs + state, ms, id + 1);
+	pthread_mutex_unlock(mut_print);
 }
 
 bool	safe_atou(const char *s, uint32_t *out)
@@ -55,6 +53,16 @@ bool	safe_atou(const char *s, uint32_t *out)
 	}
 	*out = res;
 	return (true);
+}
+
+bool	get_value(pthread_mutex_t *mut, bool *val)
+{
+	bool	ret;
+
+	pthread_mutex_lock(mut);
+	ret = *val;
+	pthread_mutex_unlock(mut);
+	return (ret);
 }
 
 int	main(int ac, char **av)

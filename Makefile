@@ -6,12 +6,15 @@
 #    By: mrouves <marvin@42.fr>                     +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/10/08 18:27:35 by mrouves           #+#    #+#              #
-#    Updated: 2025/01/30 18:51:32 by mrouves          ###   ########.fr        #
+#    Updated: 2025/03/23 22:58:36 by mrouves          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
-include sources/sources.mk
 include sources/pretty_compile.mk
+
+SOURCES		:=	main.c\
+				philo.c\
+				table.c\
 
 NAME 			:= philo
 
